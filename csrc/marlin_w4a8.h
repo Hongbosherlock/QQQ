@@ -16,21 +16,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
 
-#include <torch/extension.h>
+ #include <torch/extension.h>
 
-void qqq_gemm(
-  const torch::Tensor& A,
-  const torch::Tensor& B,
-        torch::Tensor& C,
-        torch::Tensor& D,
-  const torch::Tensor& s1,
-  const torch::Tensor& s2,
-  const torch::Tensor& s3,
-        torch::Tensor& workspace,
-  int thread_k = -1,
-  int thread_n = -1,
-  int sms = -1,
-  int max_par = 8
-);
+ torch::Tensor moe_w4a8_marlin_gemm(
+   const torch::Tensor& a,
+   const torch::Tensor& b,
+   std::optional<torch::Tensor> const& d_or_none,
+   const torch::Tensor& s1,
+   const torch::Tensor& s2,
+   const torch::Tensor& s3,
+   torch::Tensor& sorted_token_ids,           //moe
+   torch::Tensor& expert_ids,
+   torch::Tensor& num_tokens_past_padded,
+   torch::Tensor& topk_weights,
+   int64_t moe_block_size, 
+   int64_t top_k,
+   bool mul_topk_weights,
+   bool is_ep,                                //moe
+   torch::Tensor& workspace,
+   int64_t prob_m,
+   int64_t prob_n,
+   int64_t prob_k
+ );
+ 

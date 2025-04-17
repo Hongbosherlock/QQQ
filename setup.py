@@ -26,7 +26,7 @@ setup(
     ext_modules=[
         cpp_extension.CUDAExtension(
             name="QQQ._CUDA",
-            sources=["csrc/pybind.cpp", "csrc/qqq_gemm.cu"],
+            sources=["csrc/pybind.cpp", "csrc/marin_w4a8.cu"],
         ),
     ],
     cmdclass={"build_ext": cpp_extension.BuildExtension.with_options(use_ninja=False)},
