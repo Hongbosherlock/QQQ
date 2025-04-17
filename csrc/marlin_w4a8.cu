@@ -1463,15 +1463,23 @@
    int64_t prob_k
  ) {
  
-   // int pack_factor = 32 / 4;
  
-   // int groupsize = (s3.numel() == 0) ? -1 : prob_k / s3.size(0);
    int num_groups = s3.size(1);
-   // print()
-   int groupsize = (s3.numel() == 0) ? -1 : prob_k / num_groups;
+   // int groupsize = (s3.numel() == 0) ? -1 : prob_k / num_groups;
+   TORCH_CHECK(s3.size(2) == prob_n, "s3 dim 2 = ", s3.size(2),
+               " is not prob_n = ", prob_n);
+   int group_size = -1;
+   if (num_groups > 1) {
+     TORCH_CHECK(
+           prob_k % num_groups == 0, "prob_k = ", prob_k,
+           ", is not divisible by s3.size(1) = ", s3.size(1));
+     group_size = prob_k / num_groups;
+   } else {
+     group_size = -1;
+   }
  
-   if (groupsize != -1 && groupsize * s3.size(0) != prob_k)
-     AT_ERROR("k=", prob_k, " not compatible with ", s3.size(0), " groups.");
+   // if (groupsize != -1 && groupsize * s3.size(0) != prob_k)
+   //   AT_ERROR("k=", prob_k, " not compatible with ", s3.size(0), " groups.");
  
    // if (workspace.numel() < prob_n / 128 * max_par)
    //   AT_ERROR("workspace must be of size at least ", prob_n / 128 * max_par, ".");
@@ -1486,6 +1494,7 @@
    // Verify device and strides
    TORCH_CHECK(a.device().is_cuda(), "A is not on GPU");
    TORCH_CHECK(a.is_contiguous(), "A is not contiguous");
+   // Verify A
    TORCH_CHECK(a.size(0) == prob_m, "Shape mismatch: a.size(0) = ", a.size(0),
                ", prob_m = ", prob_m);
    TORCH_CHECK(a.size(1) == prob_k, "Shape mismatch: a.size(1) = ", a.size(1),
@@ -1586,7 +1595,7 @@
      moe_block_size, top_k, mul_topk_weights, is_ep,
      prob_m, prob_n, prob_k,
      workspace.data_ptr(),
-     groupsize,
+     group_size,
      num_groups,
      dev,
      at::cuda::getCurrentCUDAStream(dev),

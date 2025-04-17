@@ -78,6 +78,8 @@ def test_single_marlin_moe_multiply(m: int, n: int, k: int, e: int, topk: int,
 
         print("w_ref",w_ref.shape)
         print("qweight",qweight.shape)
+        print("s3",s_group.shape)
+        print("s_ch",s_ch.shape)
         w_ref_l.append(w_ref.T)
         qweight_l.append(qweight)
         s_group_l.append(s_group)
@@ -103,6 +105,11 @@ def test_single_marlin_moe_multiply(m: int, n: int, k: int, e: int, topk: int,
 
     torch_output = torch_moe_single(a_input, w_ref, score, topk)
 
+    print("torch_output",torch_output.shape)
+    print("marlin_output",marlin_output.shape)
+    print("marlin_output",marlin_output)
+
+    # exit(0)
     torch.testing.assert_close(marlin_output, torch_output, atol=2e-2, rtol=0)
 
 
